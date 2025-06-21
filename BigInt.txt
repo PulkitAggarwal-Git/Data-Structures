@@ -1,0 +1,462 @@
+#include <bits/stdc++.h>
+using namespace std;
+ 
+class BigInt{
+    string digits;
+public:
+ 
+    //Constructors:
+    BigInt(unsigned long long n = 0);
+    BigInt(string &s);
+    BigInt(const BigInt &a);
+    
+    friend bool Null(const BigInt &a);
+    friend int Length(const BigInt &a);
+    int operator[](const int)const;
+    
+    BigInt &operator++();
+    BigInt operator++(int temp);
+    BigInt &operator--();
+    BigInt operator--(int temp);
+ 
+    friend BigInt &operator+=(BigInt &a, const BigInt &b);
+    friend BigInt operator+(const BigInt &a, const BigInt &b);
+    friend BigInt operator-(const BigInt &a, const BigInt &b);
+    friend BigInt &operator-=(BigInt &a, const BigInt &b);
+ 
+    friend bool operator==(const BigInt &, const BigInt &);
+    friend bool operator!=(const BigInt &, const BigInt &);
+    friend bool operator<(const BigInt &a,const BigInt &b);
+ 
+    friend BigInt &operator*=(BigInt &, const BigInt &);
+    friend BigInt operator*(const BigInt &, const BigInt &);
+    friend BigInt &operator/=(BigInt &, const BigInt &);
+    friend BigInt operator/(const BigInt &, const BigInt &);
+    
+    friend ostream &operator<<(ostream &,const BigInt &);
+    friend istream &operator>>(istream &, BigInt &);
+};
+
+BigInt::BigInt(string &s)
+{
+    digits="";
+    int n=s.size();
+    for(int i=0;i<n;i++)
+    {
+        if(!isdigit(s[i]))
+        throw("ERROR");
+        else
+        digits.push_back(s[i]-'0');
+    }
+}
+BigInt::BigInt(unsigned long long n)
+{
+    do{
+        this->digits.push_back(n%10);
+        n/=10;
+    }while(n);
+}
+BigInt::BigInt(const BigInt &a)
+{
+    this->digits=a.digits;
+}
+bool Null(const BigInt &a)
+{
+    if(a.digits.size()==1 && a.digits[0]==0)
+    return true;
+    return false;
+}
+int Length(const BigInt &a)
+{
+    return a.digits.size();
+}
+bool operator==(const BigInt &a, const BigInt &b)
+{
+    return a.digits==b.digits;
+}
+bool operator!=(const BigInt &a, const BigInt &b)
+{
+    return !(a==b);
+}
+int BigInt::operator[](const int index)const
+{
+    if(digits.size() <= index || index < 0)
+        throw("ERROR");
+    return digits[index];
+}
+bool operator<(const BigInt &a,const BigInt &b)
+{
+    int l1=Length(a),l2=Length(b);
+    if(l1!=l2)
+    return l1<l2;
+    while(l1--)
+    {
+        if(a.digits[l1]!=b.digits[l1])
+        return a.digits[l1]<b.digits[l1];
+    }
+    return false;
+}
+bool operator>(const BigInt &a, const BigInt &b)
+{
+    return b<a;
+}
+BigInt &BigInt::operator++()
+{
+    /*int t=0;
+    int n=this->digits.size();
+    //cout<<(this->digits[1])-'0';
+    for(int i=0;i<=n-1;i++)
+    {
+        //cout<<this->digits[i]<<endl;
+        if(int(this->digits[i])==9)
+        {
+            this->digits[i]=0;
+            t=1;
+        }
+        else
+        {
+            this->digits[i]=int(this->digits[i])+1;
+            break;
+        }
+        
+    }
+    if(t!=0)
+    {
+        this->digits.insert(this->digits.begin(),1,t);
+    }
+    cout<<int(this->digits[0])<<endl;
+    cout<<int(this->digits[1])<<endl;
+    cout<<(this->digits[0])<<endl;
+    cout<<(this->digits[1])<<endl;
+    return *this;*/
+    int carry = 1; 
+    int size=digits.size()-1;
+    for (int i = 0; i <=size && carry; ++i) {
+        int sum = (digits[i] - '0') + carry;
+        carry = sum / 10;
+        digits[i] = (sum % 10) + '0';
+    }
+    // If there's a carry left after adding 1 to the least significant digit, insert a new digit at the beginning
+    if (carry)
+        digits.insert(digits.begin(), '1');
+    return *this;
+}
+BigInt BigInt::operator++(int temp)
+{
+    BigInt ans= *this;
+    ++(*this);
+    return ans;
+}
+BigInt &BigInt::operator--()
+{
+    int n=this->digits.size();
+    //cout<<"\n"<<int(this->digits[0]);
+    int b=0;
+    for(int i=n-1;i>=0;i--)
+    {
+        if(int(this->digits[i])==0)
+        {
+            this->digits[i]=9;
+            b=1;
+        }
+        else
+        this->digits[i]=int(this->digits[i])-b;
+    }
+    return *this;
+}
+BigInt BigInt::operator--(int temp)
+{
+    BigInt ans;
+    ans= *this;
+    --(*this);
+    return ans;
+}
+/*BigInt &operator+=(BigInt &a, const BigInt &b)
+{
+    int carry = 0;
+    int n = a.digits.size(), m = b.digits.size();
+    int i,j=0;
+    string res = "";
+    int digit;
+    //if(n<m)
+    //a.digits.append(m-n,0);
+    while (i <=n-1 || j <= m-1 || carry) {
+         digit = carry;
+        if (i <= n-1)
+        {
+           // cout<<a[i]<<" ";
+            digit += (a.digits[i++]);
+            //cout<<digit<<"    ";
+        }
+        if (j <= m-1)
+        {
+            //cout<<b[j]<<" ";
+            digit += (b.digits[j++]);
+            //cout<<digit<<" ";
+        }
+        carry = digit / 10;
+        res = char(digit % 10 + '0') + res;
+        //cout << res<<endl;
+    }
+   /* while(i<=n-1)
+    {
+        digit+=a.digits[i++]+carry;
+        carry=digit/10;
+        res = char(digit % 10 + '0') + res;
+    }
+     while(j<=m-1)
+    {
+        digit+=b.digits[i++]+carry;
+        carry=digit/10;
+        res = char(digit % 10 + '0') + res;
+    }
+    a.digits = res;
+    return a;
+}*/
+BigInt &operator+=(BigInt &a,const BigInt& b){
+    int t = 0, s, i;
+   // cout<<a[0]<<endl;
+//    cout<<b[0]<<endl;
+    int n = Length(a), m = Length(b);
+    if(m > n)
+        a.digits.append(m - n, 0);
+    n = Length(a);
+    int k=Length(a);
+    for (i = 0; i < n;i++){
+        if(i < m)
+            s = (a.digits[i] + b.digits[i]) + t;
+        else
+            s = a.digits[i] + t;
+        t = s / 10;
+        a.digits[i] = char((s % 10)+'0');
+    }
+    if(t)
+        a.digits.push_back(t);
+        n=Length(a);
+        i=0,s=n-1;
+        while(i<s)
+        {
+            int digit = a.digits[i];
+            a.digits[i] = a.digits[s];
+            a.digits[s] = digit;
+            i++;
+            s--;
+        }
+    return a;
+}
+BigInt operator+(const BigInt &a, const BigInt &b)
+{
+    BigInt temp;
+    temp=a;
+    //cout<<"First operand"<<a[0]<<endl;
+    temp+=b;
+    //cout<<"Second operand"<<b[0]<<endl;
+    //cout<<"Result"<<temp<<endl;
+     /*int n=Length(a);
+     int i=0,s=n-1;
+        while(i<s)
+        {
+            int digit = temp.digits[i];
+            temp.digits[i] = temp.digits[s];
+            temp.digits[s] = digit;
+            i++;
+            s--;
+        }*/
+    return temp;
+}
+BigInt &operator-=(BigInt &a, const BigInt &b)
+{
+    if (a < b)
+        cout<<"Subtraction Result is Negative"<<endl;
+        else
+        {
+    int borrow = 0;
+    int n = a.digits.size(), m = b.digits.size();
+    int i = 0, j = 0;
+    //cout<<i<<endl;
+    //cout<<j<<endl;
+    string res = "";
+        //cout<<a[i]<<endl;
+        //cout<<b[i]<<endl;
+    while (i <= n-1 || j <= m-1) {
+        int digit = borrow;
+        if (i >= 0)
+            digit += (a.digits[i++] - '0');
+        if (j >= 0)
+            digit -= (b.digits[j++] - '0');
+        if (digit < 0) {
+            digit += 10;
+            borrow = -1;
+        } else {
+            borrow = 0;
+        }
+        res = char(digit + '0') + res;
+    }
+    // Removing leading zeros
+    while (res.size() > 1 && res[0] == '0') 
+    {
+        res.erase(res.begin());
+    }
+        a.digits=res;
+    }
+  return a;
+}
+BigInt operator-(const BigInt &a, const BigInt &b)
+{
+    BigInt temp;
+    temp=a;
+    temp-=b;
+    return temp;
+}
+BigInt &operator*= (BigInt &a, const BigInt &b)
+{    
+    if(Null(a)||Null(b))
+    {
+        /*BigInt temp;
+        temp=a.digits[0]+'0';
+        return temp;*/
+        a=BigInt();
+        a.digits[0]='0';
+        return a;
+    }
+    int s1=a.digits.size();
+    int s2=b.digits.size();
+    vector<int> ans(s1+s2,0);
+    for(int i=0;i<s1;i++)
+    {
+        for(int j=0;j<s2;j++)
+        {
+            ans[i+j]+=(a.digits[i])*(b.digits[j]);
+        }
+    }
+    a.digits.resize(ans.size());
+    int s,carry=0;
+    s1+=s2;
+    for(int i=0;i<s1;i++)
+    {
+        s=carry+ans[i];
+        ans[i]=s%10;
+        carry=s/10;
+        a.digits[i]=ans[i]+'0';
+    }
+    if(carry!=0)
+        ans.push_back(carry+'0');
+    for(int i=s1-1;i>=0;i--)
+    {
+        //if(a.digits[i]=='0')
+          //  a.digits.pop_back();
+        if(!ans.empty() && ans.back() == 0) {
+            ans.pop_back();
+    }
+    //if(carry!=0)
+      //  a.digits.push_back(carry+'0');
+    /*s1=a.digits.size();
+    int i=0,j=s1-1;
+    while(i<j)
+        swap(a.digits[i++],a.digits[j--]);*/
+        stringstream ss;
+    for (int i = ans.size() - 1; i >= 0; --i) {
+        ss << ans[i];
+    }
+
+    a.digits = ss.str();
+    
+}
+return a;
+}
+BigInt operator*(const BigInt &a, const BigInt &b)
+{
+    BigInt temp;
+    temp=a;
+    temp*=b;
+    return temp;
+}
+BigInt &operator/=(BigInt &a, const BigInt &b)
+{
+   // cout<<int(a.digits[0])<<endl;
+    //cout<<b.digits[0]<<endl;
+    if(a<b)
+    {
+        a=BigInt();
+        return a;
+    }
+    if(a==b)
+    {
+        a=BigInt(1);
+        return a;
+    }
+    BigInt divisible_no=0;
+    int n=Length(a);
+    int count;
+    cout<<n;
+    vector<int> quotient(n,0);
+   // cout<<quotient;
+   cout<<n;
+    for(int i=n-1;i>=0;i--)
+    {
+        //cout<<a.digits[i];
+        divisible_no=(divisible_no*10)+a.digits[i];
+        if(divisible_no<b)
+        continue;
+        else
+        {
+            int check_no;
+            // An empty for loop to check which multiple of b divides value contained in variable divisible_no.
+            for(check_no=9;check_no*b>divisible_no;check_no--);
+            quotient[count++]=check_no;
+            divisible_no-=(check_no*b);
+            for(int i=0;i<count;i++)
+                a.digits[i]=quotient[count-i-1];
+            a.digits.resize(count);
+        }
+    }
+    return a;
+}
+istream &operator>>(istream &in, BigInt &a)
+{
+   /* string s;
+    in >> s;
+    int size=s.size();
+    a.digits.resize(size);
+    for(int i=0;i<size;i++)
+    {
+        if(!isdigit(s[i]))
+        throw("INVALID NUMBER ENTERED");
+        a.digits[i]=s[i];
+    }
+    return in;*/
+    /*string s;
+    in >> s;
+    BigInt temp(s); // Construct BigInt object from string
+    a = temp;       // Assign to the BigInt object being read into
+    return in;*/
+    unsigned long long num;
+    in >> num;  // Read input as unsigned long long
+    a = BigInt(num);  // Construct BigInt object from the input number
+    return in;
+}
+ostream &operator<<(ostream &out, const BigInt &a)
+{
+   out<<a.digits;
+    return out;
+}
+int main()
+{
+    BigInt five;
+    BigInt six,add,sub,multiply;
+    cout<<"Enter first number: ";
+    cin>>five;
+    cout<<"Enter second number: ";
+    cin>>six;
+    
+   // cout<<++five<<endl;
+    //cout<<(five++)<<endl;
+    add=five+six;
+    sub=five-six;
+    multiply = five*six;
+    cout<<"Addition is: "<<add<<endl;
+    cout<<"Subtraction is: "<<sub<<endl;
+    cout<<"Multiplication is: "<<multiply<<endl;
+    five/=six;
+    cout<<"Division is: "<<five<<endl;
+}
